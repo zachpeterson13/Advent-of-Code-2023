@@ -2,6 +2,14 @@ defmodule Day04Test do
   use ExUnit.Case
   import Day04
 
+  test "test check_for_winners math" do
+    result1 = check_for_winners({}, 4)
+    result2 = check_for_winners({}, 0)
+
+    assert result1 == 8
+    assert result2 == 0
+  end
+
   test "test part1" do
     input = """
     Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53
