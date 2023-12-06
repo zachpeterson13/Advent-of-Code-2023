@@ -19,7 +19,7 @@ Adding these up produces `142`
 
 First I needed to split the input into seperate lines
 
-```
+```elixir
 lines
 |> String.trim()
 |> String.split("\n")
@@ -27,7 +27,7 @@ lines
 
 Then I wrote a helper function that parses a line into a single two-digit integer
 
-```
+```elixir
 @spec parse_line1(String.t()) :: integer()
 defp parse_line1(line) do
 numbers =
@@ -42,7 +42,7 @@ end
 
 I can then map this function onto every line and sum to get the result for part1!
 
-```
+```elixir
 @spec part1(String.t()) :: integer()
 def part1(lines \\ @input) do
   lines
@@ -76,7 +76,7 @@ and `76`. Adding these together produces `281`.
 
 First I needed to split the input into seperate lines just like part 1
 
-```
+```elixir
 lines
 |> String.trim()
 |> String.split("\n")
@@ -85,7 +85,7 @@ lines
 But now when parsing we need to consider spelled out numbers also. To do that I
 wrote a new `parse_line2` function to help with that
 
-```
+```elixir
 @spec parse_line2(String.t()) :: integer()
 defp parse_line2(line) do
   numbers = line |> String.to_charlist() |> do_parse_line2([])
@@ -101,7 +101,7 @@ to the accumulator if it does.
 
 The first clause of 9 for checking for spelled out digits
 
-```
+```elixir
 defp do_parse_line2([?o | [?n | [?e | _]] = rest], acc) do
   do_parse_line2(rest, [?1 | acc])
 end
@@ -110,7 +110,7 @@ end
 If the chararacter is a digit then add it to the accumulator.
 If the character is not a digit then skip it.
 
-```
+```elixir
 defp do_parse_line2([head | rest], acc) do
   if head >= ?0 and head <= ?9 do
     do_parse_line2(rest, [head | acc])
@@ -122,7 +122,7 @@ end
 
 Base case: when we run out of chararacters, return the accumulator
 
-```
+```elixir
 defp do_parse_line2([], acc) do
   acc
   |> Enum.reverse()
@@ -131,7 +131,7 @@ end
 
 We can then map `parse_line2` onto every line and sum it up to get the result for part2!
 
-```
+```elixir
 @spec part2(String.t()) :: integer()
 def part2(lines \\ @input) do
   lines
