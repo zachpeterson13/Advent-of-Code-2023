@@ -32,10 +32,7 @@ defmodule Day01 do
 
   @spec parse_line2(String.t()) :: integer()
   defp parse_line2(line) do
-    numbers =
-      line
-      |> String.to_charlist()
-      |> do_parse_line2([])
+    numbers = line |> String.to_charlist() |> do_parse_line2([])
 
     [List.first(numbers), List.last(numbers)]
     |> List.to_integer()
