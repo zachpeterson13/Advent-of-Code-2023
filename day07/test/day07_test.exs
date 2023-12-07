@@ -12,9 +12,22 @@ defmodule Day07Test do
 
   # @tag :skip
   test "part1" do
-    result = part1(@input) |> IO.inspect()
+    result = part1(@input)
 
     assert result == 6440
+  end
+
+  # @tag :skip
+  test "part2" do
+    result = part2(@input)
+
+    assert result == 5905
+  end
+
+  test "get_type2_4oak" do
+    {result, _, _} = get_type2({'QQQJA', 0})
+
+    assert result == :four_of_a_kind
   end
 
   test "get_type_5oak" do
