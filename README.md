@@ -1,5 +1,7 @@
 # Advent of Code 2023
 
+![image](https://github.com/zachpeterson13/Advent-of-Code-2023/assets/50000796/7e1c3af7-53ec-4306-8edc-64ba80f42d97)
+
 [Advent of Code](https://adventofcode.com/2023/about) is an Advent calendar of small programming puzzles for a variety
 of skill sets and skill levels that can be solved in any programming language you
 like. People use them as interview prep, company training, university coursework,
