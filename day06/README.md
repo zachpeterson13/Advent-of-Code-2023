@@ -51,7 +51,7 @@ end
 Here is the `parse_input` function
 
 Here we turn this: `"Time:      7  15   30\nDistance:  9  40  200"` into this:
-'[{7, 9}, {15, 40}, {30, 200}]'
+`[{7, 9}, {15, 40}, {30, 200}]`
 
 ```elixir
 def parse_input(input) do
