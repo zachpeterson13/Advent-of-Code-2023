@@ -95,7 +95,7 @@ def part1(input \\ @input) do
 end
 ```
 
-`process` function walks the nodes until the `ZZZ` node.
+`process` function counts and walks the nodes until the `ZZZ` node.
 
 ```elixir
 def process(map, inst_q, key, acc \\ 0)
@@ -235,7 +235,7 @@ end
 ```
 
 Alternitively use `Task.async_stream` instead of `Enum.map` to do a little parallization.
-On my computer it is about 2x faster.
+On my computer it is about 2x faster(~5ms vs ~10ms).
 
 ```elixir
 def part2(input \\ @input) do
