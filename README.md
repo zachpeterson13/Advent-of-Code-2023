@@ -16,3 +16,4 @@ practice problems, a speed contest, or to challenge each other.
 - [Day 5](./day05/README.md)
 - [Day 6](./day06/README.md)
 - [Day 7](./day07/README.md)
+- [Day 8](./day08/README.md)
