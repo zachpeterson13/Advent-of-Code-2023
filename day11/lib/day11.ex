@@ -175,10 +175,13 @@ defmodule Day11 do
 
     {empty_rows, empty_cols} = find_empty(grid, num_rows, num_cols)
 
-    grid
-    |> Map.to_list()
-    |> Enum.filter(fn {_, val} -> val == "#" end)
-    |> Enum.map(fn {pos, _} -> pos end)
+    points =
+      grid
+      |> Map.to_list()
+      |> Enum.filter(fn {_, val} -> val == "#" end)
+      |> Enum.map(fn {pos, _} -> pos end)
+
+    points
     |> expand2(empty_rows, empty_cols, expand_by - 1)
     |> Comb.combinations(2)
     |> Enum.map(fn list -> List.to_tuple(list) end)
