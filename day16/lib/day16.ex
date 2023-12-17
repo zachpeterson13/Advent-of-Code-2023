@@ -169,6 +169,25 @@ defmodule Day16 do
   def part1(input \\ @input) do
     {_, grid} = input |> make_grid()
 
-    walk(grid, [{{0, 0}, {1, 0}}], [], MapSet.new([{0, 0}, {1, 0}]), MapSet.new())
+    walk(grid, [{{0, 0}, {1, 0}}], [], MapSet.new([{0, 0}]), MapSet.new())
+  end
+
+  def part2(input \\ @input) do
+    {size, grid} = input |> make_grid()
+
+    top = for pos <- 0..(size - 1), do: {{pos, 0}, {0, 1}}
+    left = for pos <- 0..(size - 1), do: {{0, pos}, {1, 0}}
+    bottom = for pos <- 0..(size - 1), do: {{pos, size - 1}, {0, -1}}
+    right = for pos <- 0..(size - 1), do: {{size - 1, pos}, {-1, 0}}
+
+    (top ++ bottom ++ left ++ right)
+    |> Task.async_stream(fn {pos, dir} ->
+      walk(grid, [{pos, dir}], [], MapSet.new([pos]), MapSet.new())
+    end)
+    |> Enum.map(fn {:ok, val} -> val end)
+    # |> Enum.map(fn {pos, dir} ->
+    #   walk(grid, [{pos, dir}], [], MapSet.new([pos]), MapSet.new())
+    # end)
+    |> Enum.max()
   end
 end

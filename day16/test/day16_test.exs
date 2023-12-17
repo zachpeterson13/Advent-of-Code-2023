@@ -20,4 +20,23 @@ defmodule Day16Test do
 
     assert result == 46
   end
+
+  test "part2" do
+    input = """
+    .|...\\....
+    |.-.\\.....
+    .....|-...
+    ........|.
+    ..........
+    .........\\
+    ..../.\\\\..
+    .-.-/..|..
+    .|....-|.\\
+    ..//.|....
+    """
+
+    result = part2(input)
+
+    assert result == 51
+  end
 end
