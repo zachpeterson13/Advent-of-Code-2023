@@ -130,7 +130,14 @@ defmodule Day17 do
     end
   end
 
-  def search(costs, start, finish, neighbors) do
+  # Part 1
+  # Dijkstras: ~550ms
+  # A*: ~480ms
+  # Part 2
+  # Dijkstras: ~1750ms
+  # A*: ~1650ms
+  # not sure if A* is working
+  def search(costs, start, finish, neighbors, heuristic \\ fn _ -> 0 end) do
     frontier =
       PriorityQueue.new()
       |> PriorityQueue.put(0, {start, :east})
@@ -139,7 +146,7 @@ defmodule Day17 do
     came_from = %{{start, :south} => nil, {start, :east} => nil}
     cost_so_far = %{{start, :south} => 0, {start, :east} => 0}
 
-    {_, cost_so_far} = loop(frontier, came_from, cost_so_far, costs, finish, neighbors)
+    {_, cost_so_far} = loop(frontier, came_from, cost_so_far, costs, finish, neighbors, heuristic)
 
     Map.filter(cost_so_far, fn {{pos, _}, _} -> pos == finish end)
     |> Map.to_list()
@@ -147,7 +154,7 @@ defmodule Day17 do
     |> Enum.min()
   end
 
-  def loop(frontier, came_from, cost_so_far, costs, finish, neighbors) do
+  def loop(frontier, came_from, cost_so_far, costs, finish, neighbors, heuristic) do
     {{_, {c, _} = current}, frontier} = PriorityQueue.pop(frontier, {{nil, {nil, nil}}, nil})
 
     if c == finish or c == nil do
@@ -163,7 +170,7 @@ defmodule Day17 do
           if not Map.has_key?(csf, next) or new_cost < csf[next] do
             csf = Map.put(csf, next, new_cost)
 
-            priority = new_cost
+            priority = new_cost + heuristic.(n)
             f = PriorityQueue.put(f, priority, next)
 
             cf = Map.put(cf, next, current)
@@ -174,7 +181,7 @@ defmodule Day17 do
           end
         end)
 
-      loop(frontier, came_from, cost_so_far, costs, finish, neighbors)
+      loop(frontier, came_from, cost_so_far, costs, finish, neighbors, heuristic)
     end
   end
 
@@ -186,7 +193,7 @@ defmodule Day17 do
     start = {0, 0}
     finish = {cols - 1, rows - 1}
 
-    search(costs, start, finish, &get_neighbors/1)
+    search(costs, start, finish, &get_neighbors/1, manhattan_dist(finish))
   end
 
   def add_pos({x1, y1}, {x2, y2}), do: {x1 + x2, y1 + y2}
@@ -331,12 +338,18 @@ defmodule Day17 do
     end
   end
 
+  def manhattan_dist({x2, y2}) do
+    fn {x1, y1} ->
+      abs(x1 - x2) + abs(y1 - y2)
+    end
+  end
+
   def part2(input \\ @input) do
     {rows, cols, costs} = input |> make_grid()
 
     start = {0, 0}
     finish = {cols - 1, rows - 1}
 
-    search(costs, start, finish, &get_neighbors2/1)
+    search(costs, start, finish, &get_neighbors2/1, manhattan_dist(finish))
   end
 end
