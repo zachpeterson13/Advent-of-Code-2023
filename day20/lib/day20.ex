@@ -80,7 +80,6 @@ defmodule Day20 do
 
   def push_button(mods, [{mod, pulse, from} | tail], queue, lows, highs) do
     {type, state_func, dest} = Map.get(mods, mod, {:output, nil, nil})
-    # |> IO.inspect(label: "#{from} -#{pulse}-> #{mod}")
 
     {new_lows, new_highs} =
       if pulse do
@@ -138,7 +137,92 @@ defmodule Day20 do
     lows * highs
   end
 
+  def push_button2(mods, until),
+    do: push_button2(mods, [{"broadcaster", false, "button"}], [], until)
+
+  def push_button2(mods, [], [], _), do: mods
+
+  def push_button2(mods, [], queue, until) do
+    push_button2(mods, Enum.reverse(queue), [], until)
+  end
+
+  def push_button2(mods, [{mod, pulse, from} | tail], queue, until) do
+    if from == until and pulse do
+      :done
+    else
+      {type, state_func, dest} = Map.get(mods, mod, {:output, nil, nil})
+
+      case type do
+        :broadcaster ->
+          new_queue = Enum.reduce(dest, queue, fn d, acc -> [{d, pulse, mod} | acc] end)
+
+          push_button2(mods, tail, new_queue, until)
+
+        :output ->
+          push_button2(mods, tail, queue, until)
+
+        :flip ->
+          if pulse == true do
+            push_button2(mods, tail, queue, until)
+          else
+            {_state, f} = state_func
+            {new_state, new_f} = f.(pulse)
+
+            updated_mods = Map.put(mods, mod, {type, {new_state, new_f}, dest})
+
+            updated_queue = Enum.reduce(dest, queue, fn d, acc -> [{d, new_state, mod} | acc] end)
+
+            push_button2(updated_mods, tail, updated_queue, until)
+          end
+
+        :con ->
+          {_state, f} = state_func
+
+          {new_state, new_f} = f.(from, pulse)
+
+          updated_mods = Map.put(mods, mod, {type, {new_state, new_f}, dest})
+
+          updated_queue = Enum.reduce(dest, queue, fn d, acc -> [{d, new_state, mod} | acc] end)
+
+          push_button2(updated_mods, tail, updated_queue, until)
+      end
+    end
+  end
+
+  def count_until(:done, count, _), do: count
+
+  def count_until(mods, count, until) do
+    push_button2(mods, until)
+    |> count_until(count + 1, until)
+  end
+
+  def gcd(a, 0), do: a
+  def gcd(0, b), do: b
+  def gcd(a, b), do: gcd(b, rem(a, b))
+
+  def lcm(0, 0), do: 0
+  def lcm(a, b), do: (a * b / gcd(a, b)) |> floor()
+
   def part2(input \\ @input) do
-    input
+    mods = parse_input(input)
+
+    # find the module that goes into rx
+    final =
+      Map.filter(mods, fn {_, {type, _, dest}} ->
+        type == :con and Enum.any?(dest, fn elem -> elem == "rx" end)
+      end)
+      |> Map.keys()
+      |> List.first()
+
+    # find the modules that go into the `final` module and count until they send a 
+    # high pulse since conjunction modules dont send a low pulse until each 
+    # input sends a high pulse.
+    # Take the lcm of all of the counts to get the answer
+    Map.filter(mods, fn {_, {_, _, dest}} -> Enum.any?(dest, fn elem -> elem == final end) end)
+    |> Map.keys()
+    # |> Enum.map(fn until -> count_until(mods, 0, until) end)
+    |> Task.async_stream(fn until -> count_until(mods, 0, until) end)
+    |> Enum.map(fn {:ok, val} -> val end)
+    |> Enum.reduce(&lcm/2)
   end
 end
