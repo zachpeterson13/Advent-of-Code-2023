@@ -70,7 +70,58 @@ defmodule Day21 do
     count_plots(grid, start, steps)
   end
 
-  def part2(input \\ @input) do
-    input
+  def bfs(grid, start) do
+    frontier = :queue.from_list([{0, start}])
+    visited = Map.new()
+
+    loop2(grid, frontier, visited)
+  end
+
+  def loop2(_, {[], []}, visited), do: visited
+
+  def loop2(grid, frontier, visited) do
+    {{:value, {dist, pos}}, frontier} = :queue.out(frontier)
+
+    if Map.has_key?(visited, pos) do
+      loop2(grid, frontier, visited)
+    else
+      visited = Map.put(visited, pos, dist)
+
+      {frontier, visited} =
+        get_neighbors(pos, grid)
+        |> Enum.reduce({frontier, visited}, fn pos, {f, v} = continue ->
+          if not Map.has_key?(visited, pos) and grid[pos] != "#" do
+            f = :queue.in({dist + 1, pos}, f)
+
+            {f, v}
+          else
+            continue
+          end
+        end)
+
+      loop2(grid, frontier, visited)
+    end
+  end
+
+  def part2(input \\ @input, steps \\ 26_501_365) do
+    {rows, _, grid} = make_grid(input)
+
+    {start, "S"} = Map.to_list(grid) |> Enum.filter(fn {_, val} -> val == "S" end) |> List.first()
+
+    visited = bfs(grid, start)
+
+    values = Map.values(visited)
+
+    even_corners = values |> Enum.filter(fn v -> rem(v, 2) == 0 and v > 65 end) |> Enum.count()
+    odd_corners = values |> Enum.filter(fn v -> rem(v, 2) == 1 and v > 65 end) |> Enum.count()
+
+    even_full = values |> Enum.filter(fn v -> rem(v, 2) == 0 end) |> Enum.count()
+    odd_full = values |> Enum.filter(fn v -> rem(v, 2) == 1 end) |> Enum.count()
+
+    n = div(steps - div(rows, 2), rows)
+
+    # ??? I have no idea only seems to work for actual input and not the test cases
+    # https://github.com/villuna/aoc23/wiki/A-Geometric-solution-to-advent-of-code-2023,-day-21
+    (n + 1) * (n + 1) * odd_full + n * n * even_full - (n + 1) * odd_corners + n * even_corners
   end
 end
