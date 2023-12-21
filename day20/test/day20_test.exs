@@ -2,6 +2,7 @@ defmodule Day20Test do
   use ExUnit.Case
   import Day20
 
+  # @tag :skip
   test "part1 - 1" do
     input = """
     broadcaster -> a, b, c
@@ -16,6 +17,7 @@ defmodule Day20Test do
     assert result == 32_000_000
   end
 
+  # @tag :skip
   test "part1 - 2" do
     input = """
     broadcaster -> a
