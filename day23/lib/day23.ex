@@ -99,7 +99,79 @@ defmodule Day23 do
     bfs(grid, start, fin)
   end
 
-  def part2(input) do
-    input
+  def dfs(edges, current, fin, dist, seen \\ MapSet.new())
+
+  def dfs(_, same, same, dist, _), do: dist
+
+  def dfs(edges, current, fin, dist, seen) do
+    if MapSet.member?(seen, current) do
+      0
+    else
+      seen = MapSet.put(seen, current)
+
+      edges[current]
+      |> Enum.reduce(0, fn {r, c, length}, acc ->
+        max(dfs(edges, {r, c}, fin, dist + length, seen), acc)
+      end)
+    end
+  end
+
+  def nodes_to_edges(grid) do
+    Map.to_list(grid)
+    |> Enum.reduce(%{}, fn {k, _}, acc ->
+      value =
+        get_neighbors(grid, k)
+        |> Enum.reduce([], fn {nr, nc}, acc2 ->
+          [{nr, nc, 1} | acc2]
+        end)
+
+      Map.put(acc, k, value)
+    end)
+  end
+
+  def collapse(edges) do
+    if Map.filter(edges, fn {_, v} -> length(v) == 2 end) |> map_size() == 0 do
+      edges
+    else
+      {{c, r}, e} =
+        Map.to_list(edges) |> Enum.filter(fn {_, v} -> length(v) == 2 end) |> List.first()
+
+      [a, b] = e
+
+      {ac, ar, al} = a
+      {bc, br, bl} = b
+
+      a = List.delete(edges[{ac, ar}], {c, r, al})
+      b = List.delete(edges[{bc, br}], {c, r, bl})
+
+      a = [{bc, br, al + bl} | a]
+      b = [{ac, ar, al + bl} | b]
+
+      edges =
+        Map.put(edges, {ac, ar}, a)
+        |> Map.put({bc, br}, b)
+        |> Map.delete({c, r})
+
+      collapse(edges)
+    end
+  end
+
+  def part2(input \\ @input) do
+    {n, m, grid} = input |> make_grid()
+
+    grid =
+      Map.to_list(grid)
+      |> Enum.filter(fn {_, v} -> v in ["<", ">", "v", "^"] end)
+      |> Enum.map(fn {k, _} -> {k, "."} end)
+      |> Enum.reduce(grid, fn {k, v}, map -> Map.put(map, k, v) end)
+
+    start = {1, 0}
+    fin = {n - 2, m - 1}
+
+    edges =
+      nodes_to_edges(grid)
+      |> collapse()
+
+    dfs(edges, start, fin, 0)
   end
 end
