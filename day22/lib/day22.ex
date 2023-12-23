@@ -106,7 +106,68 @@ defmodule Day22 do
     |> Enum.count(fn elem -> elem end)
   end
 
-  def part2(input) do
-    input
+  def count_falls(map, {{x1, y1, z1}, {x2, y2, z2}} = coord, coords) do
+    # remove brick
+    cubes =
+      for x <- x1..x2,
+          y <- y1..y2,
+          z <- z1..z2,
+          do: {x, y, z}
+
+    without_map = Enum.reduce(cubes, map, fn cube, acc -> Map.put(acc, cube, false) end)
+
+    without_list =
+      coords
+      |> Enum.filter(fn elem -> elem != coord end)
+
+    loop(without_map, without_list, 0)
+  end
+
+  def loop(map, list, count) do
+    {new_map, new_list, bricks_fell} =
+      list
+      |> Enum.reduce({map, [], 0}, fn {{x1, y1, z1}, {x2, y2, z2}} = elem,
+                                      {map, new_list, counter} ->
+        cubes =
+          for x <- x1..x2,
+              y <- y1..y2,
+              z <- z1..z2,
+              do: {x, y, z}
+
+        # remove the target brick from the map to see if it can move down
+        without = Enum.reduce(cubes, map, fn cube, acc -> Map.put(acc, cube, false) end)
+
+        if can_move_down(without, elem) do
+          {new_map, new_coord} = move_down(without, elem)
+
+          {new_map, [new_coord | new_list], counter + 1}
+        else
+          # put brick back in list if it cannot move
+          with = Enum.reduce(cubes, map, fn cube, acc -> Map.put(acc, cube, true) end)
+          {with, [elem | new_list], counter}
+        end
+      end)
+
+    if bricks_fell != 0 do
+      loop(new_map, new_list |> Enum.reverse(), count + bricks_fell)
+    else
+      count
+    end
+  end
+
+  def part2(input \\ @input) do
+    coords = input |> parse_input()
+
+    {map, coords} =
+      Enum.reduce(coords, {%{}, []}, fn coord, {map, new_list} ->
+        {new_map, new_coord} = move_down(map, coord)
+
+        {new_map, [new_coord | new_list]}
+      end)
+
+    Enum.map(coords, fn coord ->
+      count_falls(map, coord, coords |> Enum.reverse())
+    end)
+    |> Enum.sum()
   end
 end
